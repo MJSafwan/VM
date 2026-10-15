@@ -52,7 +52,6 @@ char vm_io(uint16_t addr, uint32_t val , char op) {
 
 static int (*trap_cb)() = NULL;
 
-extern void trace_trap();
 
 void vm_run(void) {
     static_assert(sizeof(op) == sizeof(uint32_t), "wrong size");
@@ -87,9 +86,6 @@ void vm_run(void) {
             case HLT: return;
             case CMP: flags = (vm_reg[REG_A] - vm_reg[REG_X]); break;
             case JZ: if (flags == 0) vm_reg[REG_PC] = (cop.A1<<8) + cop.A2; break;
-            case TRAP:
-                    trace_trap();
-                    break;
             case WRITE: 
                  vm_io((cop.A2 << 8) + cop.A3, vm_reg[cop.A1], cop.opcode);
                  break; 
