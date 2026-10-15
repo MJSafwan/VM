@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifndef VM_H_
 #define VM_H_
 
@@ -29,7 +30,8 @@ X(LSL, 0x15) \
 X(LSR, 0x16) \
 X(LOR, 0x17) \
 X(LAND, 0x18) \
-X(LXOR, 0x19)  
+X(LXOR, 0x19) \
+X(TRAP, 0x1a) 
 
 #define X(a, b) a,
 enum {
@@ -43,7 +45,7 @@ X(X, 0x1) \
 X(SP, 0x2) \
 X(PC, 0x3) \
 X(LR, 0x4) \
-X(FP, 0x5)
+X(FP, 0x5) 
 
 #define X(a, b) REG_##a,
 enum {
@@ -59,5 +61,10 @@ typedef struct {
     unsigned char A2;
     unsigned char A3;
 } op;
+
+void set_trap_callback(int (*cb)());
+char flags;
+char *vm_ram;
+uint32_t vm_reg[LAST_REG+1];
 
 #endif

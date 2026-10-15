@@ -16,11 +16,9 @@
 #define VEC_INV_INST 4
 #define VEC_ARITH_EXC 8
 
-static char flags = -1;
-
-static char *vm_ram = NULL;
-
-static uint32_t vm_reg[LAST_REG+1] = {0};
+char flags = -1;
+char *vm_ram = NULL;
+uint32_t vm_reg[LAST_REG+1] = {0};
 
 
 char vm_mmio(uint16_t addr, uint32_t val, char op) {
@@ -52,18 +50,9 @@ char vm_io(uint16_t addr, uint32_t val , char op) {
     }
 }
 
-// 1 kHz
-#define HZ 1000
+static int (*trap_cb)() = NULL;
 
-static double hz = 1000.0f/(HZ);
-static uint64_t ct = 0;
-static uint64_t pt = 0;
-
-static inline uint64_t get_time_ns() {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000 * NS + (uint64_t)ts.tv_nsec;
-}
+extern void trace_trap();
 
 void vm_run(void) {
     static_assert(sizeof(op) == sizeof(uint32_t), "wrong size");
@@ -71,10 +60,10 @@ void vm_run(void) {
     for (;;) {
         if (vm_reg[REG_PC] >= RAM_SIZE)
             __builtin_debugtrap();
-        ct = get_time_ns();
         memcpy(&cop, &vm_ram[vm_reg[REG_PC]], sizeof(op)); 
-        vm_reg[REG_PC] += ALIGN;
         
+        vm_reg[REG_PC] += ALIGN;
+
         switch (cop.opcode) {
             case NOP: break;
             case CALL: 
@@ -98,6 +87,9 @@ void vm_run(void) {
             case HLT: return;
             case CMP: flags = (vm_reg[REG_A] - vm_reg[REG_X]); break;
             case JZ: if (flags == 0) vm_reg[REG_PC] = (cop.A1<<8) + cop.A2; break;
+            case TRAP:
+                    trace_trap();
+                    break;
             case WRITE: 
                  vm_io((cop.A2 << 8) + cop.A3, vm_reg[cop.A1], cop.opcode);
                  break; 
@@ -143,13 +135,11 @@ void vm_run(void) {
                     vm_reg[REG_PC] = VEC_INV_INST;
                     break;
         }
-        for (;;) {
-            if ((get_time_ns()-pt)/(double)NS >= hz)
-                break;
-        }
-        if (vm_reg[REG_PC] >= RAM_SIZE)
+
+
+        if (vm_reg[REG_PC] >= RAM_SIZE) {
             __builtin_debugtrap();
-        pt = ct;
+        }
     }
 }
 

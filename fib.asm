@@ -1,3 +1,5 @@
+; THIS WAS AI GENERATED.
+
 .ORG 0
 VECTOR_TABLE:
     JMP _ENTRY     ; addr 0: System Boot / Reset
@@ -24,6 +26,7 @@ FIB_C       = 513  ; f(n)
 .ORG 16 ; Main firmware execution block
 _ENTRY:
     MOVI SP, 15, 254
+    TRAP
     
     ; Cache our base-10 divisor in RAM
     MOVI A, 0, 10
@@ -163,5 +166,10 @@ PRINT_NUM.DONE:
     POP LR                ; Restore original return path
     RET
 
+PANIC_MSG: 
+    .DATA "P"
+
 PANIC:
+    READ A, PANIC_MSG
+    WRITE A, SERIAL_OUT
     HLT                   ; Hardware exception safety trap
