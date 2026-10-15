@@ -1,5 +1,4 @@
-; THIS WAS AI GENERATED.
-
+; This file was AI Generated!
 .ORG 0
 VECTOR_TABLE:
     JMP _ENTRY     ; addr 0: System Boot / Reset
@@ -26,7 +25,6 @@ FIB_C       = 513  ; f(n)
 .ORG 16 ; Main firmware execution block
 _ENTRY:
     MOVI SP, 15, 254
-    TRAP
     
     ; Cache our base-10 divisor in RAM
     MOVI A, 0, 10
