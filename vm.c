@@ -153,12 +153,11 @@ char *read_file(char *fn, int *len) {
 
 int main(int argc, char **argv) {
     char *pn = argv[0];
-    argv++;
     vm_ram = malloc(RAM_SIZE);
     int len = 0;
-    char *data = read_file(argv[0], &len);
+    char *data = read_file(argv[1], &len);
     if (data == NULL) {
-        fprintf(stderr, "vm: %s: %s\n", argv[0], strerror(errno));
+        fprintf(stderr, "vm: %s: %s\n", argv[1], strerror(errno));
         return 1;
     }
     memcpy(vm_ram, data, len);
